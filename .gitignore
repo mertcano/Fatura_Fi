@@ -25,10 +25,6 @@ program/test-ledger/
 *.db-journal
 
 # Generated data
-backend/data/*.csv
-backend/ml/model.json
-backend/ml/feature_encoder.json
-backend/ml/metrics.json
 
 # OS
 .DS_Store

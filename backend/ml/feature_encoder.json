@@ -1,0 +1,60 @@
+{
+  "categorical": {
+    "sector": [
+      "agriculture",
+      "automotive",
+      "construction",
+      "electronics",
+      "food_beverage",
+      "logistics",
+      "retail",
+      "services",
+      "textile"
+    ],
+    "buyer_tier": [
+      "enterprise",
+      "micro",
+      "mid_market",
+      "small_business"
+    ],
+    "macro_scenario": [
+      "currency_shock",
+      "high_inflation",
+      "stable"
+    ]
+  },
+  "numerical": [
+    "amount_try",
+    "term_days",
+    "sme_age_months",
+    "sme_prior_invoices",
+    "sme_ontime_ratio",
+    "buyer_repeat_count",
+    "buyer_avg_days_late"
+  ],
+  "feature_order": [
+    "amount_try",
+    "term_days",
+    "sme_age_months",
+    "sme_prior_invoices",
+    "sme_ontime_ratio",
+    "buyer_repeat_count",
+    "buyer_avg_days_late",
+    "sector__agriculture",
+    "sector__automotive",
+    "sector__construction",
+    "sector__electronics",
+    "sector__food_beverage",
+    "sector__logistics",
+    "sector__retail",
+    "sector__services",
+    "sector__textile",
+    "buyer_tier__enterprise",
+    "buyer_tier__micro",
+    "buyer_tier__mid_market",
+    "buyer_tier__small_business",
+    "macro_scenario__currency_shock",
+    "macro_scenario__high_inflation",
+    "macro_scenario__stable"
+  ]
+}

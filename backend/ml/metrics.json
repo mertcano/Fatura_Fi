@@ -1,0 +1,49 @@
+{
+  "test_auc": 0.7254200424120494,
+  "brier_score": 0.16609931180547707,
+  "n_train": 8000,
+  "n_test": 2000,
+  "default_rate_train": 0.132375,
+  "feature_importance_top_10": [
+    {
+      "feature": "buyer_tier__enterprise",
+      "importance": 0.143759086728096
+    },
+    {
+      "feature": "sector__construction",
+      "importance": 0.10969289392232895
+    },
+    {
+      "feature": "buyer_tier__mid_market",
+      "importance": 0.1089397743344307
+    },
+    {
+      "feature": "buyer_tier__micro",
+      "importance": 0.06297617405653
+    },
+    {
+      "feature": "buyer_tier__small_business",
+      "importance": 0.04846851900219917
+    },
+    {
+      "feature": "macro_scenario__stable",
+      "importance": 0.041114430874586105
+    },
+    {
+      "feature": "sector__food_beverage",
+      "importance": 0.03717514127492905
+    },
+    {
+      "feature": "macro_scenario__currency_shock",
+      "importance": 0.03639275208115578
+    },
+    {
+      "feature": "sector__retail",
+      "importance": 0.036240532994270325
+    },
+    {
+      "feature": "sector__logistics",
+      "importance": 0.03475324437022209
+    }
+  ]
+}
