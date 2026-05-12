@@ -134,7 +134,12 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://faturafi.vercel.app", "https://*.vercel.app"],
+    allow_origins=[
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://fatura-fi.vercel.app",
+    "https://fatura-fi-mertcano.vercel.app",
+    "https://fatura-fi-mertcano-fatura-fis-projects.vercel.app",],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
