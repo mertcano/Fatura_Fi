@@ -3,8 +3,10 @@ Risk scoring service. Loads the trained XGBoost model and returns:
   - risk_score (0-100, higher = riskier)
   - default_probability
   - suggested_interest_rate (annualized, based on risk + term)
-  - top_drivers (SHAP-based feature attributions for explainability)
-  - grade (A/B/C/D letter rating)
+  - top_drivers (feature attributions via XGBoost's built-in pred_contribs;
+    equivalent to TreeSHAP, but avoids the shap library version mismatch
+    that fails on newer XGBoost releases)
+  - grade (A/B/C/D/E letter rating)
 """
 
 import json
@@ -13,9 +15,8 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-import shap
 import xgboost as xgb
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 ML_DIR = Path(__file__).parent.parent.parent / "ml"
 
@@ -38,12 +39,15 @@ class InvoiceInput(BaseModel):
 
 class RiskDriver(BaseModel):
     feature: str
-    impact: float  # SHAP value; positive = increases risk
+    impact: float  # signed contribution; positive = increases risk
     direction: Literal["increases_risk", "reduces_risk"]
     human_label: str
 
 
 class RiskAssessment(BaseModel):
+    # Pydantic v2: disable "model_" namespace check so model_version field works
+    model_config = ConfigDict(protected_namespaces=())
+
     risk_score: int  # 0-100, higher = riskier
     grade: Literal["A", "B", "C", "D", "E"]
     default_probability: float
@@ -86,7 +90,8 @@ class RiskScorer:
         self.model.load_model(ML_DIR / "model.json")
         with open(ML_DIR / "feature_encoder.json") as f:
             self.encoder = json.load(f)
-        self.explainer = shap.TreeExplainer(self.model)
+        # Cache the booster handle for fast SHAP-style contribution lookups
+        self._booster = self.model.get_booster()
 
     def _encode(self, inv: InvoiceInput) -> pd.DataFrame:
         row = {col: getattr(inv, col) for col in self.encoder["numerical"]}
@@ -121,11 +126,16 @@ class RiskScorer:
         prob = float(self.model.predict_proba(X)[0, 1])
         risk_score = int(round(prob * 100))
 
-        # SHAP attributions for THIS invoice
-        shap_values = self.explainer.shap_values(X)
-        if isinstance(shap_values, list):
-            shap_values = shap_values[1] if len(shap_values) > 1 else shap_values[0]
-        contributions = list(zip(X.columns.tolist(), shap_values[0]))
+        # Feature attributions via XGBoost's built-in TreeSHAP implementation.
+        # `pred_contribs=True` returns SHAP values directly from the booster,
+        # no dependency on the external `shap` library (which has version
+        # mismatch issues with XGBoost >= 2.0).
+        # Shape: (1, n_features + 1) — last column is the bias/expected value.
+        dmatrix = xgb.DMatrix(X)
+        contribs = self._booster.predict(dmatrix, pred_contribs=True)
+        shap_vals = contribs[0][:-1]  # drop bias term
+
+        contributions = list(zip(X.columns.tolist(), shap_vals.tolist()))
         contributions.sort(key=lambda x: -abs(x[1]))
 
         drivers = []
