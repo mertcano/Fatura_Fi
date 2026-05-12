@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "@solana/wallet-adapter-react-ui/styles.css";
+
+:root {
+  color-scheme: dark;
+  --color-bg: #0B0B0F;
+  --color-purple: #9945FF;
+  --color-mint: #14F195;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  background: #0B0B0F;
+  color: #FAFAFA;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Custom selection colors */
+::selection {
+  background: rgba(153, 69, 255, 0.3);
+  color: #fff;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0B0F;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* ─── Reusable component classes ─── */
+
+@layer components {
+  /* Gradient text effect */
+  .text-gradient-brand {
+    background: linear-gradient(135deg, #c084fc 0%, #14F195 50%, #c084fc 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 8s ease-in-out infinite;
+  }
+
+  /* Glow orb backgrounds */
+  .glow-purple {
+    position: absolute;
+    border-radius: 50%;
+    background: #9945FF;
+    filter: blur(120px);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .glow-mint {
+    position: absolute;
+    border-radius: 50%;
+    background: #14F195;
+    filter: blur(140px);
+    opacity: 0.2;
+    pointer-events: none;
+  }
+
+  /* Glass card effect */
+  .glass-card {
+    background: rgba(24, 24, 27, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-card-hover {
+    transition: all 0.3s ease;
+  }
+  .glass-card-hover:hover {
+    background: rgba(39, 39, 42, 0.5);
+    border-color: rgba(153, 69, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all duration-200;
+    background: #fff;
+    color: #0B0B0F;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 40px -10px rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all duration-200;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-brand {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all duration-200 relative overflow-hidden;
+    background: linear-gradient(135deg, #9945FF 0%, #7c2dff 100%);
+    color: #fff;
+  }
+  .btn-brand::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #14F195 0%, #9945FF 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .btn-brand:hover::before {
+    opacity: 1;
+  }
+  .btn-brand:hover {
+    box-shadow: 0 10px 40px -10px rgba(153, 69, 255, 0.6);
+  }
+  .btn-brand > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Grid background pattern */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Number stat with gradient */
+  .stat-number {
+    @apply text-5xl md:text-6xl font-medium tracking-tight;
+    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.5) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* ─── Animation keyframes ─── */
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Wallet adapter button overrides — match our brand */
+.wallet-adapter-button {
+  background: linear-gradient(135deg, #9945FF 0%, #7c2dff 100%) !important;
+  border-radius: 9999px !important;
+  font-family: inherit !important;
+  font-weight: 500 !important;
+  height: 40px !important;
+  font-size: 13px !important;
+  padding: 0 18px !important;
+  transition: all 0.2s ease !important;
+}
+
+.wallet-adapter-button:hover {
+  background: linear-gradient(135deg, #14F195 0%, #9945FF 100%) !important;
+  box-shadow: 0 0 30px -5px rgba(153, 69, 255, 0.5) !important;
+}
+
+.wallet-adapter-button-trigger {
+  background: linear-gradient(135deg, #9945FF 0%, #7c2dff 100%) !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background: #0B0B0F !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.wallet-adapter-modal-title {
+  color: #fafafa !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 12px !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background: rgba(153, 69, 255, 0.1) !important;
+  border-color: rgba(153, 69, 255, 0.3) !important;
+}

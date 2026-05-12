@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+venv/
+.venv/
+*.egg-info/
+
+# Node
+node_modules/
+.next/
+out/
+.env.local
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+
+# Anchor / Solana
+program/target/
+program/.anchor/
+program/test-ledger/
+
+# Database
+*.db
+*.db-journal
+
+# Generated data
+backend/data/*.csv
+backend/ml/model.json
+backend/ml/feature_encoder.json
+backend/ml/metrics.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
