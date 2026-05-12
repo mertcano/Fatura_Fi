@@ -4,69 +4,88 @@
 
 **The capital market for unpaid invoices, settled on Solana.**
 
-AI-powered invoice tokenization protocol for Turkish SMEs. Receivables become NFTs, priced by an explainable risk model, funded by global stablecoin investors.
+Turkish small businesses wait 60–120 days to get paid on their invoices. FaturaFi turns those invoices into tokenized assets, scores them with AI, and connects them to global stablecoin investors — so business owners can get paid in seconds instead of months.
 
 [![Built on Solana](https://img.shields.io/badge/Built_on-Solana-9945FF?style=for-the-badge&logo=solana&logoColor=white)](https://solana.com)
 [![Anchor 0.30](https://img.shields.io/badge/Anchor-0.30.1-blue?style=for-the-badge)](https://www.anchor-lang.com/)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-14F195?style=for-the-badge)](LICENSE)
 
-[Live demo](https://YOUR-VERCEL-URL.vercel.app) · [Devnet program](https://explorer.solana.com/address/CoM9J1UygQFBNwTbhK1AwT8vymCKL7dPM7KW76drNF36?cluster=devnet) · [Built for Colosseum Frontier 2026](https://www.colosseum.com)
+### 🔗 [Try the live demo →](https://fatura-fi.vercel.app)
+
+[View on Solana Explorer](https://explorer.solana.com/address/CoM9J1UygQFBNwTbhK1AwT8vymCKL7dPM7KW76drNF36?cluster=devnet) · [Submitted to Colosseum Frontier 2026](https://www.colosseum.com)
 
 </div>
 
 ---
 
-## The problem
+## The problem we're solving
 
-Small and medium businesses (KOBİ) in Türkiye wait **60 to 120 days** to get paid on invoices. During that wait, they're operating without working capital — paying suppliers, salaries, and rent from a shrinking bank balance.
+Every small business in Türkiye knows this story:
 
-The Turkish KOBİ market is **3.5 million businesses** representing 73% of employment and 56% of GDP. The total cash trapped in unpaid invoices at any moment is **₺2.3 trillion**.
+You ship goods or deliver a service. The buyer is reliable. The invoice gets accepted. And then you wait — 60 days, 90 days, sometimes 120 days — to actually get paid.
 
-The existing options fail most of them:
+During that wait, you still have to pay your suppliers, your rent, and your employees. From a bank balance that's already shrinking.
 
-- **Bank factoring** is gatekept (collateral, credit history, 3–5 day approval) and expensive (20–35% effective annual rates)
-- **Credit cards** have limits too low for B2B invoices
-- **Informal lenders** are usurious
-- **Doing without** is the most common path — and the leading cause of SME failure
+**The numbers behind this:**
+- 3.5 million small businesses operate in Türkiye
+- They produce 56% of the country's GDP and employ 73% of the workforce
+- At any given moment, ₺2.3 trillion is trapped in unpaid invoices
+- This cash-flow gap is the single biggest reason these businesses fail
+
+**Why existing solutions don't work for most of them:**
+
+| Option | The problem |
+|---|---|
+| Bank factoring | Requires collateral and credit history. Takes 3–5 days. Effective rates of 20–35% per year. |
+| Credit cards | Limits are far too low for typical B2B invoice amounts. |
+| Informal lenders | Predatory rates, no structure, no legal protection. |
+| Doing nothing | The most common choice. Also the most common cause of failure. |
 
 ---
 
 ## What FaturaFi does
 
-A protocol that turns unpaid invoices into globally tradable, AI-priced financial instruments on Solana.
+FaturaFi turns unpaid invoices into tokenized assets that anyone holding stablecoins can fund.
 
-1. **SME lists an invoice** through a Phantom-connected dApp
-2. **AI scores it** in under 2 seconds (XGBoost + SHAP explanations)
-3. **NFT mints** on Solana via an Anchor program; the risk hash is committed on-chain
-4. **Investors fund it** by depositing discounted USDC, which lands in the SME's wallet immediately
-5. **At maturity**, the buyer settles the face value, which transfers to the current NFT holder
+Here's the full flow, in five steps:
+
+1. **A business lists an invoice.** They open the dApp, connect their Phantom wallet, and enter the invoice details: buyer name, amount, payment term.
+
+2. **The AI scores it instantly.** An XGBoost model trained on Turkish factoring market data returns a risk score (0–100), a letter grade (A through E), and a suggested discount rate. The whole thing takes under 2 seconds. The model also returns SHAP explanations — meaning the investor can see *exactly which factors* drove the score.
+
+3. **An NFT mints on Solana.** Our Anchor program creates a unique NFT that represents this specific receivable. The risk score and a hash of the explanation are committed on-chain, so the assessment is verifiable later.
+
+4. **An investor funds the invoice.** They browse the marketplace, filter by sector or risk grade, and pay discounted USDC. The business owner gets that USDC in their wallet in about 400 milliseconds.
+
+5. **The buyer pays at maturity.** When the original buyer pays the face value, the full amount goes to whoever holds the NFT. The investor's profit is the spread.
 
 ---
 
-## Why Solana
+## Why this only works on Solana
 
-The product is impossible on any chain without all three of these properties:
+This isn't a "we picked Solana because it's popular" thing. The product is **economically impossible** on most other chains. Here's why:
 
-| Need | Why | Solana |
+| Requirement | Why we need it | Solana delivers |
 |---|---|---|
-| Per-tx cost < 0.01% of face value | Micro-invoices (50–500 USDC) become uneconomical otherwise | `$0.00025` |
-| Settlement in seconds | SMEs need their cash now, not after a 12-minute wait | `~400ms` |
-| Throughput at SME scale | 3.5M SMEs × 12 invoices/year = 42M tx/year minimum | `65k TPS` |
+| Per-transaction cost under 0.01% of invoice value | A $100 invoice can't afford $5 in gas | ~$0.00025 |
+| Settlement in seconds, not minutes | Business owners need cash *now*, not after 12 minutes of confirmations | ~400ms finality |
+| Throughput at SME scale | 3.5M businesses × 12 invoices/year = 42M transactions/year minimum | 65,000 TPS |
 
-Ethereum L1 fails on cost. Most L2s fail on finality during congestion. A factoring protocol that takes 5 minutes during peak hours isn't a factoring protocol — it's a slow bank.
+On Ethereum L1, gas fees would eat the entire investor spread. On most L2s, finality slows down during congestion — which is exactly when small businesses need their money the fastest. Solana is the only network where the numbers actually work.
 
 ---
 
-## Architecture
+## How everything fits together
 
 ```
 ┌─────────────────────┐         ┌─────────────────────┐
 │  Next.js frontend   │ ◄─────► │   FastAPI backend   │
 │  Phantom wallet     │  HTTPS  │   XGBoost + SHAP    │
+│  hosted on Vercel   │         │  hosted on Railway  │
 └──────────┬──────────┘         └──────────┬──────────┘
            │                                │
-           │  Anchor RPC                    │  SQLite/Postgres
+           │  Anchor RPC                    │  SQLite
            ▼                                ▼
 ┌─────────────────────┐         ┌─────────────────────┐
 │   Solana devnet     │         │   invoices table    │
@@ -79,145 +98,151 @@ Ethereum L1 fails on cost. Most L2s fail on finality during congestion. A factor
 └─────────────────────┘
 ```
 
-### Repo layout
+### Repository structure
 
 ```
 faturafi/
-├── program/          Anchor (Rust) — on-chain invoice tokenization
+├── program/          Anchor program (Rust) — the on-chain protocol
 │   ├── programs/faturafi/src/lib.rs
 │   └── tests/faturafi.ts
-├── backend/          FastAPI (Python) — risk scoring API + DB
+├── backend/          FastAPI service (Python) — risk scoring + DB
 │   ├── ml/           XGBoost training pipeline
-│   └── app/          FastAPI service
-├── frontend/         Next.js 14 (TypeScript) — UI + wallet
+│   └── app/          API routes
+├── frontend/         Next.js 14 (TypeScript) — UI + Solana wallet
 │   └── src/
-├── docs/             X posts, additional notes
-└── scripts/          setup.sh
+├── docs/             Notes, X posts, additional docs
+└── scripts/          One-command setup script
 ```
 
 ---
 
 ## The AI risk model
 
+The heart of FaturaFi is a real, trained machine learning model — not a chatbot wrapper.
+
 | Property | Value |
 |---|---|
 | Algorithm | XGBoost (gradient-boosted trees) |
-| Training data | 10,000 synthetic invoices calibrated to Turkish factoring market dynamics |
-| Features | Sector (9), buyer tier (4), macro scenario (3), amount, term, SME age, prior invoices, on-time ratio, buyer history, payment delays |
+| Training data | 10,000 synthetic invoices calibrated to real Turkish factoring patterns |
+| Features used | 22 (sector, buyer size, macroeconomic conditions, payment history, term length, amounts) |
 | Test AUC | **0.72** |
 | Brier score | 0.17 |
-| Explainability | SHAP values per prediction; SHA-256 hash committed on-chain |
+| Explainability | SHAP values per prediction, hashed and committed on-chain |
 
-### Top features driving predictions
+### What drives a typical prediction
 
-1. **Buyer tier** (Enterprise/Mid-market/Small/Micro) — largest single driver
-2. **Sector** — construction and agriculture carry higher default rates
-3. **Macro scenario** — currency shock periods 1.8× base default rate
-4. **Payment term length** — longer terms compound risk
-5. **SME on-time payment ratio** — historical reliability
+Based on actual feature importance from the trained model:
 
-Every invoice page shows the top SHAP drivers so investors understand *why* the model scored it that way — not just the number.
+1. **Who the buyer is.** An enterprise-level buyer (think Migros, LC Waikiki) is far safer than a micro-business buyer. This single factor matters more than anything else.
+2. **What sector the business is in.** Construction and agriculture carry higher historical default rates. Services and food businesses are safer.
+3. **The macroeconomic environment.** During currency shocks, default rates roughly double across the board.
+4. **How long the payment term is.** A 120-day invoice carries materially more risk than a 30-day one.
+5. **The business's track record.** A history of on-time payment significantly reduces risk, even for newer businesses.
+
+Every invoice in the marketplace has a **"Why this score?"** button. Click it and you see the actual SHAP drivers behind that specific number — not a black box.
 
 ---
 
 ## The on-chain program
 
-Anchor program at `programs/faturafi/src/lib.rs`. Deployed to Solana devnet:
+The Anchor program is deployed and live on Solana devnet:
 
 ```
 CoM9J1UygQFBNwTbhK1AwT8vymCKL7dPM7KW76drNF36
 ```
 
-[View on Solana Explorer](https://explorer.solana.com/address/CoM9J1UygQFBNwTbhK1AwT8vymCKL7dPM7KW76drNF36?cluster=devnet)
+**[View it on Solana Explorer →](https://explorer.solana.com/address/CoM9J1UygQFBNwTbhK1AwT8vymCKL7dPM7KW76drNF36?cluster=devnet)**
 
-### Instructions
+### What the program does
 
-| Instruction | Caller | What happens |
+| Instruction | Who calls it | What it does |
 |---|---|---|
-| `initialize` | Authority (once) | Sets treasury, fee config, USDC mint reference |
-| `list_invoice` | SME | Creates Invoice PDA + mints unique NFT mint PDA |
-| `fund_invoice` | Investor | Transfers discounted USDC to SME, protocol fee to treasury, records investor as NFT holder |
-| `settle_invoice` | Buyer (or anyone) | Transfers face value USDC to current investor |
-| `mark_defaulted` | Anyone (after 7-day grace) | Marks invoice defaulted; unlocks recovery flow |
+| `initialize` | Protocol authority (once) | Sets up the treasury and fee config |
+| `list_invoice` | The business | Creates an Invoice account + mints a unique NFT for it |
+| `fund_invoice` | The investor | Transfers discounted USDC to the business, takes a small protocol fee, marks the NFT as funded |
+| `settle_invoice` | The buyer | Transfers the face value to the current NFT holder |
+| `mark_defaulted` | Anyone (after a 7-day grace period) | Marks an invoice as defaulted, unlocking the recovery flow |
 
-### PDAs
-
+The program uses three PDAs (Program Derived Addresses):
 - `["config"]` — global protocol config
-- `["invoice", invoice_id]` — per-invoice state
-- `["invoice_nft", invoice_id]` — per-invoice NFT mint
+- `["invoice", invoice_id]` — state for each individual invoice
+- `["invoice_nft", invoice_id]` — the NFT mint for each invoice
 
-Events are emitted on every state transition so indexers (or a future Helius webhook) can power real-time investor dashboards.
+Every state change emits an on-chain event, so indexers or webhooks can power real-time dashboards.
 
 ---
 
-## Quickstart
+## Running it locally
 
 ### Prerequisites
 
-- Node.js 20+, Python 3.11+, Rust + Solana CLI
+You'll need:
+- Node.js 20 or later
+- Python 3.11 or later
+- Rust + Solana CLI ([install guide](https://solana.com/docs/intro/installation))
 - Anchor 0.30.1 (`avm install 0.30.1 && avm use 0.30.1`)
-- Phantom wallet on devnet
+- A Phantom wallet set to Devnet
 
-### One-command setup
+### Quick start
 
 ```bash
-git clone https://github.com/YOUR_HANDLE/faturafi
-cd faturafi
+git clone https://github.com/mertcano/Fatura_Fi
+cd Fatura_Fi
 ./scripts/setup.sh
 ```
 
-This installs all dependencies, generates the synthetic dataset, and trains the model.
+The setup script installs all dependencies, generates the synthetic training data, and trains the model. Takes about 5 minutes total.
 
-### Run it
+### Run all three services
 
-In three terminals:
+You'll need three terminal windows:
 
 ```bash
-# Terminal 1 — backend
+# Terminal 1 — the backend
 cd backend && source venv/bin/activate
 uvicorn app.main:app --reload
 
-# Terminal 2 — frontend
+# Terminal 2 — the frontend
 cd frontend
 npm run dev
 
-# Terminal 3 — Anchor (only first time)
+# Terminal 3 — Anchor (only the first time)
 cd program
 anchor build && anchor deploy --provider.cluster devnet
 ```
 
-Then open <http://localhost:3000> and connect a Phantom wallet (set to devnet).
+Then open <http://localhost:3000>, connect your Phantom wallet (make sure it's on Devnet), and on the marketplace page click **Load demo invoices** to seed some data.
 
-On the marketplace page, click **Load demo invoices** once to seed.
-
-Full step-by-step in [DEPLOY.md](DEPLOY.md).
+For step-by-step deployment instructions, see [DEPLOY.md](DEPLOY.md).
 
 ---
 
-## What's working
+## What's working in this MVP
 
-- AI risk scoring with SHAP explanations (live, sub-second response)
-- Next.js 14 frontend with Phantom & Solflare wallet adapters
-- Marketplace with sector/risk/amount filters
-- SME invoice listing form with all model inputs
-- Investor portfolio dashboard with realized/expected returns
-- FastAPI backend with SQLAlchemy persistence
-- Anchor program implementing the full invoice lifecycle
-- End-to-end TypeScript integration tests
-- Deployed to Solana devnet
-- Solana-inspired UI/UX with Geist font and brand gradients
+- ✅ Live AI risk scoring with sub-second response times
+- ✅ SHAP-based explanations for every score
+- ✅ Next.js 14 frontend with Phantom and Solflare wallet support
+- ✅ Filterable marketplace (by sector, risk grade, amount)
+- ✅ SME invoice submission form with all model inputs
+- ✅ Investor portfolio dashboard showing realized and expected returns
+- ✅ FastAPI backend with database persistence
+- ✅ Anchor program covering the full invoice lifecycle
+- ✅ End-to-end TypeScript integration tests for the program
+- ✅ Deployed and running on Solana devnet
+- ✅ Production frontend on Vercel + backend on Railway
+- ✅ Solana-native visual design with Geist typography
 
 ---
 
-## Roadmap
+## What comes next
 
-**Q3 2026** — Pilot with 5 Turkish SMEs and 2 family-office investors. Real (non-synthetic) training data starts flowing.
+**Q3 2026** — A pilot with 5 Turkish SMEs (we have early conversations going with textile workshops in Bursa and electronics suppliers in Konya) and 2 family-office investors. The synthetic training data gets replaced with real anonymized invoice data.
 
-**Q4 2026** — KVKK (Turkish GDPR) compliance audit. Pyth oracle integration for TRY/USD. Buyer verification flow (KEP signature → on-chain attestation).
+**Q4 2026** — A KVKK (Turkish GDPR) compliance audit. Pyth oracle integration for live TRY/USD pricing. A buyer verification flow using e-signature attestations recorded on-chain.
 
-**Q1 2027** — Tranching: pool similar-risk invoices into senior/junior tranches for institutional capital.
+**Q1 2027** — Tranching: pooling similar-risk invoices into senior and junior tranches so institutional capital can participate at the risk level they want.
 
-**Q2 2027** — Open the protocol to other emerging markets with similar SME cash-flow gaps (Brazil, Indonesia, Egypt).
+**Q2 2027** — Expanding the protocol to other emerging markets with similar SME cash-flow problems — Brazil, Indonesia, Egypt.
 
 ---
 
@@ -226,22 +251,24 @@ Full step-by-step in [DEPLOY.md](DEPLOY.md).
 | Layer | Technology |
 |---|---|
 | On-chain | Solana, Anchor 0.30.1, SPL Token |
-| Risk model | XGBoost, scikit-learn, SHAP |
+| Risk model | XGBoost, scikit-learn, SHAP-via-XGBoost |
 | Backend | FastAPI, SQLAlchemy, Pydantic |
-| Frontend | Next.js 14 (App Router), TypeScript, Tailwind, Geist font |
-| Wallet | @solana/wallet-adapter (Phantom + Solflare) |
-| Database | PostgreSQL (or SQLite for local dev) |
+| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS, Geist font |
+| Wallets | @solana/wallet-adapter (Phantom + Solflare) |
+| Deployment | Vercel (frontend), Railway (backend), Solana devnet (program) |
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Use it, fork it, build on it.
 
 ---
 
 <div align="center">
 
-Built for Colosseum Frontier 2026 · Superteam Türkiye Track
+Built for **Colosseum Frontier 2026** · Superteam Türkiye Track
+
+[Live demo](https://fatura-fi.vercel.app) · [Solana program](https://explorer.solana.com/address/CoM9J1UygQFBNwTbhK1AwT8vymCKL7dPM7KW76drNF36?cluster=devnet)
 
 </div>
