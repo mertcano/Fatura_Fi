@@ -83,6 +83,9 @@ export function InvoiceCard({ invoice: inv, canFund, onUpdate, portfolioMode = f
   const cachedMint = api.getNftMint(inv.id);
   const onChainMint = fundResult?.mintAddress || cachedMint?.mintAddress || inv.nft_mint_address;
 
+  // Is the connected wallet the SME who listed this invoice?
+  const isOwnListing = publicKey && publicKey.toBase58() === inv.sme_wallet;
+
   return (
     <div className="group relative">
       <div className="relative glass-card glass-card-hover rounded-2xl p-6">
@@ -192,6 +195,22 @@ export function InvoiceCard({ invoice: inv, canFund, onUpdate, portfolioMode = f
           ) : (
             <div className="w-full py-3 rounded-xl border border-bark-800/10 text-bark-400 text-sm text-center">
               {inv.status === "funded" ? "Position active" : inv.status === "settled" ? "Settled" : "Listed"}
+            </div>
+          )
+        ) : isOwnListing ? (
+          // You listed this invoice — can't fund your own, show on-chain proof
+          onChainMint ? (
+            <a
+              href={explorerAddress(onChainMint)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 rounded-xl bg-terra-500/8 border border-terra-500/25 text-terra-700 text-sm flex items-center justify-center gap-2 hover:bg-terra-500/12 transition font-medium"
+            >
+              <ExternalLink size={13} /> Your listing · View NFT on Explorer
+            </a>
+          ) : (
+            <div className="w-full py-3 rounded-xl bg-terra-500/8 border border-terra-500/25 text-terra-700 text-sm text-center font-medium">
+              Your listing · waiting for investors
             </div>
           )
         ) : canFund ? (
