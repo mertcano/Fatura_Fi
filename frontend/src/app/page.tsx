@@ -11,12 +11,6 @@ export default function HomePage() {
       <section className="relative pt-24 pb-32 px-6">
         <div className="max-w-7xl mx-auto relative">
 
-          {/* Eyebrow badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-bark-800/4 border border-bark-800/10 mb-8 animate-fade-in">
-            <span className="w-1.5 h-1.5 rounded-full bg-mint-500" />
-            <span className="text-xs text-bark-500 font-medium">Colosseum Frontier 2026 · Superteam Türkiye</span>
-          </div>
-
           {/* Headline */}
           <h1 className="text-display-xl max-w-5xl animate-fade-up text-bark-800">
             The capital market<br />
