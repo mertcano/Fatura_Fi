@@ -63,8 +63,8 @@ export default function MarketplacePage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
         <div>
           <div className="section-eyebrow">— Marketplace</div>
-          <h1 className="text-display-md text-bark-800">
-            <span className="font-serif-italic text-terra-500">Tokenized</span> invoices,<br />
+          <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-bark-800">
+            Tokenized invoices,<br />
             ready to fund.
           </h1>
           <p className="text-bark-500 mt-3 max-w-xl">

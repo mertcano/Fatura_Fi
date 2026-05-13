@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { api, Sector, BuyerTier } from "@/lib/api";
-import { Loader2, AlertCircle, Sparkles, ArrowRight } from "lucide-react";
+import { mintInvoiceNFT, explorerTx } from "@/lib/solana/mint";
+import { Loader2, AlertCircle, Sparkles, ArrowRight, CheckCircle2, ExternalLink } from "lucide-react";
 
 const SECTORS: { value: Sector; label: string }[] = [
   { value: "textile", label: "Textile" },
@@ -25,11 +26,15 @@ const TIERS: { value: BuyerTier; label: string; hint: string }[] = [
   { value: "micro", label: "Micro", hint: "Under 10 employees" },
 ];
 
+type Stage = "form" | "scoring" | "minting" | "minted";
+
 export default function ListInvoicePage() {
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, signTransaction } = useWallet();
+  const { connection } = useConnection();
   const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
+  const [stage, setStage] = useState<Stage>("form");
   const [error, setError] = useState<string | null>(null);
+  const [mintInfo, setMintInfo] = useState<{ mintAddress: string; txSignature: string; invoiceId: string } | null>(null);
 
   const [form, setForm] = useState({
     sme_name: "",
@@ -47,42 +52,117 @@ export default function ListInvoicePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!publicKey) {
+    if (!publicKey || !signTransaction) {
       setError("Please connect your wallet first.");
       return;
     }
-    setSubmitting(true);
     setError(null);
+
+    let invoiceId: string | null = null;
     try {
+      // Step 1: AI scoring + DB record
+      setStage("scoring");
       const inv = await api.createInvoice({
         ...form,
         sme_wallet: publicKey.toBase58(),
       });
-      router.push(`/invoice/${inv.id}`);
+      invoiceId = inv.id;
+
+      // Step 2: Mint real NFT on Solana devnet
+      setStage("minting");
+      const result = await mintInvoiceNFT(connection, publicKey, signTransaction);
+
+      // Step 3: Record the on-chain mint address on the invoice
+      await api.attachNftMint(inv.id, result.mintAddress, result.txSignature);
+
+      setMintInfo({
+        mintAddress: result.mintAddress,
+        txSignature: result.txSignature,
+        invoiceId: inv.id,
+      });
+      setStage("minted");
     } catch (e: any) {
-      setError(e.message || "Submission failed");
-    } finally {
-      setSubmitting(false);
+      console.error(e);
+      const msg = e?.message || String(e);
+      // Common cases: user rejected, insufficient SOL, etc.
+      if (msg.includes("User rejected") || msg.includes("declined")) {
+        setError("Transaction cancelled. To list the invoice on-chain, please approve the Phantom signature request.");
+      } else if (msg.toLowerCase().includes("insufficient")) {
+        setError("Not enough SOL for transaction fees. Run `solana airdrop 2 YOUR_WALLET --url devnet` or use https://faucet.solana.com");
+      } else {
+        setError(msg);
+      }
+      setStage("form");
     }
   }
+
+  // ─── Success view ───────────────────────────────
+  if (stage === "minted" && mintInfo) {
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-16">
+        <div className="glass-card rounded-3xl p-10 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-mint-500/10 border border-mint-500/30 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 size={32} className="text-mint-500" />
+          </div>
+          <h1 className="text-3xl font-medium tracking-tight text-bark-800">
+            Invoice NFT minted on-chain
+          </h1>
+          <p className="text-bark-500 mt-3">
+            Your invoice is now a tokenized receivable. It&apos;s live on Solana devnet and ready for funding.
+          </p>
+
+          <div className="mt-8 bg-cream-50 rounded-xl p-5 text-left space-y-3 border border-bark-800/8">
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-bark-400 font-mono font-semibold mb-1">NFT mint address</div>
+              <div className="font-mono text-xs text-bark-700 break-all">{mintInfo.mintAddress}</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-bark-400 font-mono font-semibold mb-1">Transaction</div>
+              <div className="font-mono text-xs text-bark-700 break-all">{mintInfo.txSignature.slice(0, 24)}…{mintInfo.txSignature.slice(-20)}</div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href={explorerTx(mintInfo.txSignature)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary justify-center"
+            >
+              <ExternalLink size={14} /> View on Solana Explorer
+            </a>
+            <button
+              onClick={() => router.push(`/invoice/${mintInfo.invoiceId}`)}
+              className="btn-brand justify-center"
+            >
+              See invoice listing <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Main form view ────────────────────────────
+  const busy = stage === "scoring" || stage === "minting";
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
       <div className="mb-10">
         <div className="section-eyebrow">— List invoice</div>
-        <h1 className="text-display-md text-bark-800">
-          Get an <span className="font-serif-italic text-terra-500">AI-scored</span><br />
+        <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-bark-800">
+          Get an <span className="text-terra-500">AI-scored</span><br />
           offer in seconds.
         </h1>
         <p className="text-bark-500 mt-3">
-          Tokenize your receivable. Find a stablecoin investor instantly.
+          Tokenize your receivable as a real Solana NFT. Find a SOL investor instantly.
         </p>
       </div>
 
       {!connected && (
         <div className="mb-6 flex items-center gap-2 p-4 rounded-xl bg-terra-500/8 border border-terra-500/25 text-terra-700 text-sm">
           <AlertCircle size={16} />
-          Connect your Phantom wallet to list an invoice.
+          Connect your Phantom wallet to list an invoice on-chain.
         </div>
       )}
 
@@ -95,6 +175,7 @@ export default function ListInvoicePage() {
               onChange={(e) => setForm({ ...form, sme_name: e.target.value })}
               placeholder="Anadolu Tekstil Ltd."
               className="input"
+              disabled={busy}
             />
           </Field>
           <Field label="Buyer / debtor name">
@@ -104,6 +185,7 @@ export default function ListInvoicePage() {
               onChange={(e) => setForm({ ...form, buyer_name: e.target.value })}
               placeholder="Migros Ticaret A.Ş."
               className="input"
+              disabled={busy}
             />
           </Field>
           <div className="grid grid-cols-2 gap-4">
@@ -112,6 +194,7 @@ export default function ListInvoicePage() {
                 value={form.sector}
                 onChange={(e) => setForm({ ...form, sector: e.target.value as Sector })}
                 className="input"
+                disabled={busy}
               >
                 {SECTORS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
@@ -121,6 +204,7 @@ export default function ListInvoicePage() {
                 value={form.buyer_tier}
                 onChange={(e) => setForm({ ...form, buyer_tier: e.target.value as BuyerTier })}
                 className="input"
+                disabled={busy}
               >
                 {TIERS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
@@ -138,6 +222,7 @@ export default function ListInvoicePage() {
                 value={form.amount_try}
                 onChange={(e) => setForm({ ...form, amount_try: Number(e.target.value) })}
                 className="input"
+                disabled={busy}
               />
             </Field>
             <Field label="Payment term (days)">
@@ -149,6 +234,7 @@ export default function ListInvoicePage() {
                 value={form.term_days}
                 onChange={(e) => setForm({ ...form, term_days: Number(e.target.value) })}
                 className="input"
+                disabled={busy}
               />
             </Field>
           </div>
@@ -163,6 +249,7 @@ export default function ListInvoicePage() {
                 value={form.sme_age_months}
                 onChange={(e) => setForm({ ...form, sme_age_months: Number(e.target.value) })}
                 className="input"
+                disabled={busy}
               />
             </Field>
             <Field label="Prior invoices issued">
@@ -172,6 +259,7 @@ export default function ListInvoicePage() {
                 value={form.sme_prior_invoices}
                 onChange={(e) => setForm({ ...form, sme_prior_invoices: Number(e.target.value) })}
                 className="input"
+                disabled={busy}
               />
             </Field>
           </div>
@@ -184,6 +272,7 @@ export default function ListInvoicePage() {
               value={form.sme_ontime_ratio}
               onChange={(e) => setForm({ ...form, sme_ontime_ratio: Number(e.target.value) })}
               className="w-full accent-terra-500"
+              disabled={busy}
             />
           </Field>
         </Section>
@@ -197,6 +286,7 @@ export default function ListInvoicePage() {
                 value={form.buyer_repeat_count}
                 onChange={(e) => setForm({ ...form, buyer_repeat_count: Number(e.target.value) })}
                 className="input"
+                disabled={busy}
               />
             </Field>
             <Field label="Avg payment delay (days)">
@@ -207,6 +297,7 @@ export default function ListInvoicePage() {
                 value={form.buyer_avg_days_late}
                 onChange={(e) => setForm({ ...form, buyer_avg_days_late: Number(e.target.value) })}
                 className="input"
+                disabled={busy}
               />
             </Field>
           </div>
@@ -220,15 +311,21 @@ export default function ListInvoicePage() {
 
         <button
           type="submit"
-          disabled={submitting || !connected}
+          disabled={busy || !connected}
           className="btn-brand w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {submitting ? (
-            <><Loader2 size={16} className="animate-spin" /> Scoring invoice...</>
+          {stage === "scoring" ? (
+            <><Loader2 size={16} className="animate-spin" /> Scoring with AI…</>
+          ) : stage === "minting" ? (
+            <><Loader2 size={16} className="animate-spin" /> Minting NFT on Solana — approve in Phantom…</>
           ) : (
-            <><Sparkles size={16} /> Get AI-scored offer <ArrowRight size={16} /></>
+            <><Sparkles size={16} /> Score & mint on-chain <ArrowRight size={16} /></>
           )}
         </button>
+
+        <p className="text-xs text-bark-400 text-center">
+          Two steps: (1) AI generates a risk score, (2) you sign a Phantom transaction that mints a real NFT on Solana devnet. Only network fees apply (~0.002 SOL). No USDC, no token swap.
+        </p>
       </form>
 
       <style jsx>{`
@@ -249,6 +346,10 @@ export default function ListInvoicePage() {
         }
         :global(.input::placeholder) {
           color: rgba(61, 46, 31, 0.3);
+        }
+        :global(.input:disabled) {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
       `}</style>
     </div>

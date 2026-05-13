@@ -26,7 +26,7 @@ export default function HomePage() {
           {/* Subhead */}
           <p className="mt-8 text-lg md:text-xl text-bark-500 max-w-2xl leading-relaxed animate-fade-up" style={{ animationDelay: "0.1s" }}>
             Turkish SMEs wait 60–120 days to get paid. FaturaFi tokenizes their unpaid invoices,
-            prices them with AI, and connects them to global stablecoin liquidity — settled on Solana in seconds.
+            prices them with AI, and connects them to global Solana liquidity — settled in seconds.
           </p>
 
           {/* CTA buttons */}
@@ -62,7 +62,7 @@ export default function HomePage() {
           <div className="max-w-2xl mb-16">
             <div className="section-eyebrow">— What we built</div>
             <h2 className="text-display-md text-bark-800">
-              Real <span className="font-serif-italic text-terra-500">AI</span>. <span className="text-gradient-brand">Real chain.</span> Real money.
+              Real AI. <span className="text-gradient-brand">Real chain.</span> Real money.
             </h2>
           </div>
 
@@ -77,14 +77,14 @@ export default function HomePage() {
               {
                 icon: Coins,
                 color: "mint",
-                title: "Instant USDC liquidity",
-                body: "SMEs receive discounted USDC the moment an investor funds. No bank intermediation, no 5-day clearing, no FX cost on stablecoin rails.",
+                title: "Instant SOL liquidity",
+                body: "SMEs receive discounted SOL the moment an investor funds. No bank intermediation, no 5-day clearing, no FX friction — settlement is native Solana.",
               },
               {
                 icon: ShieldCheck,
                 color: "terra",
                 title: "On-chain transparency",
-                body: "Each invoice is an NFT representing the receivable. Risk score and SHAP-hash are committed on-chain so judges, regulators, and counterparties can audit.",
+                body: "Each invoice is a real NFT on Solana representing the receivable. Risk score and SHAP-hash are committed on-chain so judges, regulators, and counterparties can audit.",
               },
             ].map((f, i) => (
               <div key={i} className="glass-card glass-card-hover rounded-2xl p-7 group">
@@ -104,16 +104,16 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto relative">
           <div className="max-w-2xl mb-16">
             <div className="section-eyebrow">— The flow</div>
-            <h2 className="text-display-md text-bark-800">From <span className="font-serif-italic text-terra-500">invoice</span><br />to <span className="text-gradient-brand">working capital.</span></h2>
+            <h2 className="text-display-md text-bark-800">From invoice<br />to <span className="text-gradient-brand">working capital.</span></h2>
           </div>
 
           <div className="space-y-3">
             {[
               ["01", "SME lists invoice", "Upload buyer, amount, payment term through the dApp."],
               ["02", "AI scores it instantly", "XGBoost returns score 0–100, grade A–E, suggested discount."],
-              ["03", "Invoice NFT minted", "Anchor program mints a unique NFT on Solana representing the receivable."],
-              ["04", "Investor funds it", "Marketplace investors purchase the NFT with USDC."],
-              ["05", "SME gets liquidity", "Discounted USDC lands in SME's wallet in ~400ms."],
+              ["03", "Invoice NFT minted", "Phantom signs; a real NFT is minted on Solana representing the receivable."],
+              ["04", "Investor funds it", "Marketplace investors purchase the invoice NFT with SOL."],
+              ["05", "SME gets liquidity", "Discounted SOL lands in SME's wallet in ~400ms."],
               ["06", "Buyer settles at maturity", "Face value transfers to investor; spread is the yield."],
             ].map(([num, title, body]) => (
               <div
@@ -137,18 +137,17 @@ export default function HomePage() {
       <section className="relative py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="bg-cream-200 border border-bark-800/8 rounded-3xl p-10 md:p-16 relative overflow-hidden">
-            {/* Inner glow */}
             <div className="absolute -top-40 -right-40 w-[400px] h-[400px] bg-terra-500 rounded-full opacity-8 blur-[100px]" />
 
             <div className="relative">
               <div className="section-eyebrow text-mint-500">— Why Solana</div>
               <h2 className="text-display-md mb-12 max-w-3xl text-bark-800">
-                This product is <span className="font-serif-italic text-terra-500">impossible</span> on any other chain.
+                This product is <span className="text-gradient-brand">impossible</span> on any other chain.
               </h2>
 
               <div className="grid md:grid-cols-3 gap-12">
                 {[
-                  { value: "$0.00025", label: "Per-transaction cost", body: "Micro-invoices (50–500 USDC) become economically viable. On L1 EVMs, $5 in gas would consume the entire spread." },
+                  { value: "$0.00025", label: "Per-transaction cost", body: "Micro-invoices (0.5–5 SOL face value) become economically viable. On L1 EVMs, $5 in gas would consume the entire spread." },
                   { value: "400ms", label: "Settlement finality", body: "SMEs get their working capital in seconds, not the 3–5 days bank wires take after factoring approval." },
                   { value: "65k TPS", label: "Network throughput", body: "Scales to millions of invoices without congestion pricing. Turkish KOBİ market alone is 3.5M businesses." },
                 ].map((stat) => (
@@ -168,7 +167,7 @@ export default function HomePage() {
       <section className="relative py-24 px-6">
         <div className="max-w-4xl mx-auto text-center relative">
           <h2 className="text-display-lg text-bark-800">
-            <span className="font-serif-italic text-terra-500">Real-world</span> yield,<br />
+            Real-world yield,<br />
             <span className="text-gradient-brand">real-world impact.</span>
           </h2>
           <p className="mt-8 text-lg text-bark-500 max-w-2xl mx-auto">

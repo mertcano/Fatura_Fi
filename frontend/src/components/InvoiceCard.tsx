@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { Invoice, api } from "@/lib/api";
-import { Building2, Calendar, TrendingUp, Info, Loader2, CheckCircle2, ChevronDown } from "lucide-react";
+import { mintInvoiceNFT, explorerAddress } from "@/lib/solana/mint";
+import {
+  Building2, Calendar, TrendingUp, Info, Loader2, CheckCircle2, ChevronDown, ExternalLink
+} from "lucide-react";
 
 // Grade colors — A=mint, gradients down to E=warm red (Toprak palette)
 const GRADE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
@@ -30,13 +33,17 @@ interface Props {
   invoice: Invoice;
   canFund: boolean;
   onUpdate: () => void;
+  /** Show "View on Explorer" instead of fund button. Used in Portfolio page. */
+  portfolioMode?: boolean;
 }
 
-export function InvoiceCard({ invoice: inv, canFund, onUpdate }: Props) {
-  const { publicKey } = useWallet();
+export function InvoiceCard({ invoice: inv, canFund, onUpdate, portfolioMode = false }: Props) {
+  const { publicKey, signTransaction } = useWallet();
+  const { connection } = useConnection();
   const [expanded, setExpanded] = useState(false);
   const [funding, setFunding] = useState(false);
   const [funded, setFunded] = useState(false);
+  const [fundResult, setFundResult] = useState<{ mintAddress: string } | null>(null);
 
   const dueDate = new Date(inv.due_date);
   const daysToMaturity = Math.round((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -45,20 +52,36 @@ export function InvoiceCard({ invoice: inv, canFund, onUpdate }: Props) {
   const youPay = inv.amount_usdc * (1 - inv.suggested_discount_rate);
 
   async function handleFund() {
-    if (!publicKey) return;
+    if (!publicKey || !signTransaction) return;
     setFunding(true);
     try {
-      const mockNftMint = `NFT${inv.id.replace(/-/g, "").slice(0, 40)}`;
-      await api.fundInvoice(inv.id, publicKey.toBase58(), mockNftMint);
+      // Mint a real NFT representing the investor's claim on this invoice
+      const result = await mintInvoiceNFT(connection, publicKey, signTransaction);
+      // Record on backend so portfolio reflects ownership
+      await api.fundInvoice(inv.id, publicKey.toBase58(), result.mintAddress);
+      // Cache for explorer link
+      await api.attachNftMint(inv.id, result.mintAddress, result.txSignature);
+      setFundResult({ mintAddress: result.mintAddress });
       setFunded(true);
       setTimeout(() => onUpdate(), 800);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Funding failed. Check console for details.");
+      const msg = e?.message || String(e);
+      if (msg.includes("User rejected") || msg.includes("declined")) {
+        alert("Transaction cancelled in Phantom. To fund this invoice, approve the signature request.");
+      } else if (msg.toLowerCase().includes("insufficient")) {
+        alert("Not enough SOL for transaction fees. Get devnet SOL at https://faucet.solana.com");
+      } else {
+        alert(`Funding failed: ${msg}`);
+      }
     } finally {
       setFunding(false);
     }
   }
+
+  // Pull on-chain mint info if present (portfolio mode or post-fund)
+  const cachedMint = api.getNftMint(inv.id);
+  const onChainMint = fundResult?.mintAddress || cachedMint?.mintAddress || inv.nft_mint_address;
 
   return (
     <div className="group relative">
@@ -84,11 +107,11 @@ export function InvoiceCard({ invoice: inv, canFund, onUpdate }: Props) {
         <div className="space-y-2.5 mb-5 py-4 border-y border-bark-800/8">
           <div className="flex justify-between text-sm">
             <span className="text-bark-500">Face value</span>
-            <span className="font-mono text-bark-800">${inv.amount_usdc.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span className="font-mono text-bark-800">{inv.amount_usdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SOL</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-bark-500">You pay</span>
-            <span className="font-mono text-bark-800">${youPay.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span className="font-mono text-bark-800">{youPay.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SOL</span>
           </div>
           <div className="flex justify-between items-center pt-1">
             <span className="text-bark-600 text-sm font-medium">Implied APY</span>
@@ -139,24 +162,53 @@ export function InvoiceCard({ invoice: inv, canFund, onUpdate }: Props) {
           </div>
         )}
 
-        {/* Action button */}
-        {funded ? (
-          <div className="w-full py-3 rounded-xl bg-mint-500/10 border border-mint-500/30 text-mint-600 text-sm flex items-center justify-center gap-2 font-semibold">
-            <CheckCircle2 size={14} /> Funded successfully
+        {/* ─── Action button — context-aware ─── */}
+        {funded && fundResult ? (
+          // Just funded successfully
+          <div className="space-y-2">
+            <div className="w-full py-3 rounded-xl bg-mint-500/10 border border-mint-500/30 text-mint-600 text-sm flex items-center justify-center gap-2 font-semibold">
+              <CheckCircle2 size={14} /> Funded successfully
+            </div>
+            <a
+              href={explorerAddress(fundResult.mintAddress)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-2.5 rounded-xl border border-bark-800/10 text-bark-500 text-xs flex items-center justify-center gap-1.5 hover:bg-bark-800/4 transition"
+            >
+              <ExternalLink size={11} /> View NFT on Solana Explorer
+            </a>
           </div>
+        ) : portfolioMode ? (
+          // Portfolio view — you already own this, show explorer link
+          onChainMint ? (
+            <a
+              href={explorerAddress(onChainMint)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 rounded-xl border border-bark-800/10 text-bark-700 text-sm flex items-center justify-center gap-2 hover:bg-bark-800/4 hover:border-terra-500/30 transition font-medium"
+            >
+              <ExternalLink size={13} /> View on Solana Explorer
+            </a>
+          ) : (
+            <div className="w-full py-3 rounded-xl border border-bark-800/10 text-bark-400 text-sm text-center">
+              {inv.status === "funded" ? "Position active" : inv.status === "settled" ? "Settled" : "Listed"}
+            </div>
+          )
         ) : canFund ? (
+          // Marketplace, wallet connected — can fund
           <button
             onClick={handleFund}
             disabled={funding}
             className="w-full py-3 rounded-xl bg-gradient-warm text-cream-50 text-sm font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-terra-500/30 disabled:opacity-50 transition-all"
           >
             {funding ? (
-              <><Loader2 size={14} className="animate-spin" /> Processing</>
+              <><Loader2 size={14} className="animate-spin" /> Minting NFT — approve in Phantom…</>
             ) : (
               "Fund this invoice"
             )}
           </button>
         ) : (
+          // Marketplace, no wallet
           <div className="w-full py-3 rounded-xl border border-bark-800/10 text-bark-400 text-sm text-center">
             Connect wallet to fund
           </div>

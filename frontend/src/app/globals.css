@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 @import "@solana/wallet-adapter-react-ui/styles.css";
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
 
 :root {
   color-scheme: light;
@@ -34,11 +33,12 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar-thumb:hover { background: #C5B89D; }
 
 @layer components {
-  /* ─── Typography accents ─── */
+  /* NOTE: Italic variant — kept for visual rhythm but now uses Geist (sans) italic,
+     so the typography stays unified across the entire site. */
   .font-serif-italic {
-    font-family: 'Instrument Serif', serif;
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
     font-style: italic;
-    font-weight: 400;
+    font-weight: 500;
   }
 
   /* ─── Gradient text — terra + mint ─── */

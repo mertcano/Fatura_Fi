@@ -81,6 +81,32 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+// ─── localStorage helpers for NFT mint records ─────────────────
+// The backend does not (yet) persist on-chain mint info beyond the funding step;
+// we record list-time mints client-side. Indexed by invoice ID.
+const NFT_STORAGE_KEY = "faturafi:nft-mints";
+
+interface NftMintRecord {
+  invoiceId: string;
+  mintAddress: string;
+  txSignature: string;
+  mintedAt: string;
+}
+
+function getNftMintMap(): Record<string, NftMintRecord> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(NFT_STORAGE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveNftMintMap(map: Record<string, NftMintRecord>) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(NFT_STORAGE_KEY, JSON.stringify(map));
+}
+
 export const api = {
   createInvoice: (payload: CreateInvoicePayload) =>
     request<Invoice>("/api/invoices", { method: "POST", body: JSON.stringify(payload) }),
@@ -115,4 +141,28 @@ export const api = {
   portfolio: (wallet: string) => request<PortfolioSummary>(`/api/portfolio/${wallet}`),
 
   seed: () => request<{ status: string; count?: number }>(`/api/seed`, { method: "POST" }),
+
+  // ─── Client-side NFT mint tracking (no backend changes required) ───
+  /**
+   * Record a freshly minted invoice NFT on the client. The on-chain proof
+   * is the tx signature itself; we cache the mint address per invoice
+   * so the UI can show "View on Solana Explorer" without a round-trip.
+   */
+  attachNftMint(invoiceId: string, mintAddress: string, txSignature: string) {
+    const map = getNftMintMap();
+    map[invoiceId] = { invoiceId, mintAddress, txSignature, mintedAt: new Date().toISOString() };
+    saveNftMintMap(map);
+    return Promise.resolve();
+  },
+
+  /** Get the on-chain mint record for a specific invoice (if any). */
+  getNftMint(invoiceId: string): NftMintRecord | null {
+    const map = getNftMintMap();
+    return map[invoiceId] || null;
+  },
+
+  /** All locally tracked mints — useful for portfolio enrichment. */
+  getAllNftMints(): NftMintRecord[] {
+    return Object.values(getNftMintMap());
+  },
 };

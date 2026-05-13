@@ -33,8 +33,8 @@ export default function PortfolioPage() {
         <div className="w-16 h-16 rounded-2xl bg-terra-500/10 border border-terra-500/25 flex items-center justify-center mx-auto mb-6">
           <Wallet size={28} className="text-terra-500" />
         </div>
-        <h1 className="text-display-md text-bark-800">
-          Connect your <span className="font-serif-italic text-terra-500">wallet</span>
+        <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-bark-800">
+          Connect your wallet
         </h1>
         <p className="text-bark-500 mt-3">Sign in with Phantom to view your invoice portfolio.</p>
       </div>
@@ -52,16 +52,16 @@ export default function PortfolioPage() {
     <div className="page-wrapper">
       <div className="mb-10">
         <div className="section-eyebrow">— Portfolio</div>
-        <h1 className="text-display-md text-bark-800">
-          Your <span className="font-serif-italic text-terra-500">positions</span>.
+        <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-bark-800">
+          Your positions.
         </h1>
         <p className="text-bark-400 mt-2 font-mono text-xs break-all">{portfolio.wallet}</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
         <Stat icon={Clock} label="Active positions" value={portfolio.active_positions.toString()} />
-        <Stat icon={Wallet} label="Invested" value={`$${portfolio.total_invested_usdc.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} />
-        <Stat icon={TrendingUp} label="Expected returns" value={`$${portfolio.expected_returns_usdc.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} accent />
+        <Stat icon={Wallet} label="Invested" value={`${portfolio.total_invested_usdc.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL`} />
+        <Stat icon={TrendingUp} label="Expected returns" value={`${portfolio.expected_returns_usdc.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL`} accent />
         <Stat icon={CheckCircle} label="Settled" value={portfolio.settled_count.toString()} />
       </div>
 
@@ -70,7 +70,7 @@ export default function PortfolioPage() {
           <h2 className="text-xl font-semibold mb-5 text-bark-800">Active positions</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {active.map((inv) => (
-              <InvoiceCard key={inv.id} invoice={inv} canFund={false} onUpdate={load} />
+              <InvoiceCard key={inv.id} invoice={inv} canFund={false} onUpdate={load} portfolioMode />
             ))}
           </div>
         </section>
@@ -81,7 +81,7 @@ export default function PortfolioPage() {
           <h2 className="text-xl font-semibold mb-5 text-bark-800">Settled</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {settled.map((inv) => (
-              <InvoiceCard key={inv.id} invoice={inv} canFund={false} onUpdate={load} />
+              <InvoiceCard key={inv.id} invoice={inv} canFund={false} onUpdate={load} portfolioMode />
             ))}
           </div>
         </section>
