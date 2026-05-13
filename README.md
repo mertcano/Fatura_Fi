@@ -2,24 +2,24 @@
 
 <h1>FaturaFi</h1>
 
-**The capital market for unpaid invoices, settled on Solana.**
+**Paid before payday.**
 
-Turkish small businesses wait 60–120 days to get paid on their invoices. FaturaFi turns those invoices into tokenized assets, scores them with AI, and connects them to global stablecoin investors — so business owners can get paid in seconds instead of months.
+Turkish small businesses wait 60–120 days to get paid on their invoices. FaturaFi turns those invoices into real Solana NFTs, scores them with explainable AI, and connects them to global liquidity — so business owners get paid in seconds instead of months.
 
 [![Built on Solana](https://img.shields.io/badge/Built_on-Solana-9945FF?style=for-the-badge&logo=solana&logoColor=white)](https://solana.com)
 [![Anchor 0.30](https://img.shields.io/badge/Anchor-0.30.1-blue?style=for-the-badge)](https://www.anchor-lang.com/)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-14F195?style=for-the-badge)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-14B981?style=for-the-badge)](LICENSE)
 
 ### 🔗 [Try the live demo →](https://fatura-fi.vercel.app)
 
-[View on Solana Explorer](https://explorer.solana.com/address/CoM9J1UygQFBNwTbhK1AwT8vymCKL7dPM7KW76drNF36?cluster=devnet) · [Submitted to Colosseum Frontier 2026](https://www.colosseum.com)
+[View the Solana program](https://explorer.solana.com/address/CoM9J1UygQFBNwTbhK1AwT8vymCKL7dPM7KW76drNF36?cluster=devnet) · Built for [Colosseum Frontier 2026](https://www.colosseum.com) — Superteam Türkiye
 
 </div>
 
 ---
 
-## The problem we're solving
+## The problem
 
 Every small business in Türkiye knows this story:
 
@@ -30,7 +30,7 @@ During that wait, you still have to pay your suppliers, your rent, and your empl
 **The numbers behind this:**
 - 3.5 million small businesses operate in Türkiye
 - They produce 56% of the country's GDP and employ 73% of the workforce
-- At any given moment, ₺2.3 trillion is trapped in unpaid invoices
+- At any given moment, **₺2.3 trillion** is trapped in unpaid invoices
 - This cash-flow gap is the single biggest reason these businesses fail
 
 **Why existing solutions don't work for most of them:**
@@ -46,17 +46,17 @@ During that wait, you still have to pay your suppliers, your rent, and your empl
 
 ## What FaturaFi does
 
-FaturaFi turns unpaid invoices into tokenized assets that anyone holding stablecoins can fund.
+FaturaFi tokenizes unpaid invoices as Solana NFTs that anyone can fund with SOL.
 
-Here's the full flow, in five steps:
+Here's the flow, in five steps:
 
-1. **A business lists an invoice.** They open the dApp, connect their Phantom wallet, and enter the invoice details: buyer name, amount, payment term.
+1. **A business lists an invoice.** They open the dApp, connect Phantom, and enter the invoice details: buyer name, amount, payment term, business history.
 
-2. **The AI scores it instantly.** An XGBoost model trained on Turkish factoring market data returns a risk score (0–100), a letter grade (A through E), and a suggested discount rate. The whole thing takes under 2 seconds. The model also returns SHAP explanations — meaning the investor can see *exactly which factors* drove the score.
+2. **The AI scores it instantly.** An XGBoost model trained on Turkish factoring market data returns a risk score (0–100), a letter grade (A through E), and a suggested discount rate. The whole thing takes under 2 seconds. The model also returns **SHAP explanations** — so the investor can see *exactly which factors* drove the score.
 
-3. **An NFT mints on Solana.** Our Anchor program creates a unique NFT that represents this specific receivable. The risk score and a hash of the explanation are committed on-chain, so the assessment is verifiable later.
+3. **A real NFT mints on Solana.** Phantom signs the transaction; an SPL Token NFT (decimals=0, supply=1) is minted on Solana devnet representing this specific receivable. Every mint produces a real transaction signature visible on Solana Explorer.
 
-4. **An investor funds the invoice.** They browse the marketplace, filter by sector or risk grade, and pay discounted USDC. The business owner gets that USDC in their wallet in about 400 milliseconds.
+4. **An investor funds the invoice.** They browse the marketplace, filter by sector or risk grade, and fund it. The business owner gets discounted SOL in their wallet in about 400 milliseconds.
 
 5. **The buyer pays at maturity.** When the original buyer pays the face value, the full amount goes to whoever holds the NFT. The investor's profit is the spread.
 
@@ -68,9 +68,10 @@ This isn't a "we picked Solana because it's popular" thing. The product is **eco
 
 | Requirement | Why we need it | Solana delivers |
 |---|---|---|
-| Per-transaction cost under 0.01% of invoice value | A $100 invoice can't afford $5 in gas | ~$0.00025 |
+| Per-transaction cost under 0.01% of invoice value | A 0.5 SOL invoice can't afford $5 in gas | ~$0.00025 |
 | Settlement in seconds, not minutes | Business owners need cash *now*, not after 12 minutes of confirmations | ~400ms finality |
 | Throughput at SME scale | 3.5M businesses × 12 invoices/year = 42M transactions/year minimum | 65,000 TPS |
+| Native NFT primitives | Each invoice needs to be a transferable, unique on-chain asset | SPL Token with decimals=0 |
 
 On Ethereum L1, gas fees would eat the entire investor spread. On most L2s, finality slows down during congestion — which is exactly when small businesses need their money the fastest. Solana is the only network where the numbers actually work.
 
@@ -81,20 +82,22 @@ On Ethereum L1, gas fees would eat the entire investor spread. On most L2s, fina
 ```
 ┌─────────────────────┐         ┌─────────────────────┐
 │  Next.js frontend   │ ◄─────► │   FastAPI backend   │
-│  Phantom wallet     │  HTTPS  │   XGBoost + SHAP    │
+│  + Phantom wallet   │  HTTPS  │   XGBoost + SHAP    │
 │  hosted on Vercel   │         │  hosted on Railway  │
 └──────────┬──────────┘         └──────────┬──────────┘
            │                                │
-           │  Anchor RPC                    │  SQLite
+           │  Solana RPC                    │  SQLite
            ▼                                ▼
 ┌─────────────────────┐         ┌─────────────────────┐
 │   Solana devnet     │         │   invoices table    │
-│   FaturaFi program  │         │   risk_drivers      │
-│   • initialize      │         │   portfolios        │
-│   • list_invoice    │         └─────────────────────┘
-│   • fund_invoice    │
-│   • settle_invoice  │
-│   • mark_defaulted  │
+│                     │         │   risk drivers      │
+│   • SPL Token mint  │         │   portfolios        │
+│     (NFT per inv.)  │         └─────────────────────┘
+│                     │
+│   Anchor program    │
+│   (deployed, for    │
+│   full settlement   │
+│   roadmap Q3 2026)  │
 └─────────────────────┘
 ```
 
@@ -109,7 +112,9 @@ faturafi/
 │   ├── ml/           XGBoost training pipeline
 │   └── app/          API routes
 ├── frontend/         Next.js 14 (TypeScript) — UI + Solana wallet
-│   └── src/
+│   ├── src/app/      Routes (marketplace, list, portfolio, invoice/[id])
+│   ├── src/components/  Header, InvoiceCard, FaturaFiLogo (custom SVG)
+│   └── src/lib/solana/  Real SPL Token NFT minting helper
 ├── docs/             Notes, X posts, additional docs
 └── scripts/          One-command setup script
 ```
@@ -170,6 +175,16 @@ The program uses three PDAs (Program Derived Addresses):
 
 Every state change emits an on-chain event, so indexers or webhooks can power real-time dashboards.
 
+### Why the dApp uses SPL Token directly for the demo
+
+For the current hackathon MVP, the frontend mints invoice NFTs through **SPL Token directly** instead of through the Anchor program. This is a deliberate scoping decision:
+
+- The Anchor program is **deployed and verifiable on-chain**
+- Direct SPL minting lets users see a real on-chain NFT in their Phantom wallet within seconds, with no protocol initialization, no USDC mint setup, no devnet token faucet
+- Full Anchor integration (fund/settle/default through PDAs, escrow logic) is the Q3 2026 roadmap item once the pilot moves to mainnet
+
+This gives the demo real on-chain proof today, while keeping the protocol's full lifecycle ready for the production phase.
+
 ---
 
 ## Running it locally
@@ -181,7 +196,8 @@ You'll need:
 - Python 3.11 or later
 - Rust + Solana CLI ([install guide](https://solana.com/docs/intro/installation))
 - Anchor 0.30.1 (`avm install 0.30.1 && avm use 0.30.1`)
-- A Phantom wallet set to Devnet
+- A Phantom wallet set to Devnet (Settings → Developer Settings → Testnet Mode → ON)
+- A little devnet SOL — get some at [faucet.solana.com](https://faucet.solana.com)
 
 ### Quick start
 
@@ -208,7 +224,7 @@ npm run dev
 
 # Terminal 3 — Anchor (only the first time)
 cd program
-anchor build && anchor deploy --provider.cluster devnet
+anchor build --no-idl && anchor deploy --provider.cluster devnet
 ```
 
 Then open <http://localhost:3000>, connect your Phantom wallet (make sure it's on Devnet), and on the marketplace page click **Load demo invoices** to seed some data.
@@ -219,24 +235,24 @@ For step-by-step deployment instructions, see [DEPLOY.md](DEPLOY.md).
 
 ## What's working in this MVP
 
+- ✅ **Live on-chain NFT minting** — every listed invoice produces a real Solana NFT signed by the user's Phantom wallet
 - ✅ Live AI risk scoring with sub-second response times
 - ✅ SHAP-based explanations for every score
 - ✅ Next.js 14 frontend with Phantom and Solflare wallet support
 - ✅ Filterable marketplace (by sector, risk grade, amount)
-- ✅ SME invoice submission form with all model inputs
-- ✅ Investor portfolio dashboard showing realized and expected returns
+- ✅ SME invoice submission form with all 22 model inputs
+- ✅ Portfolio dashboard with two views: **Investments** and **My listings** (open / funded / settled)
 - ✅ FastAPI backend with database persistence
-- ✅ Anchor program covering the full invoice lifecycle
+- ✅ Anchor program covering the full invoice lifecycle, deployed on devnet
 - ✅ End-to-end TypeScript integration tests for the program
-- ✅ Deployed and running on Solana devnet
 - ✅ Production frontend on Vercel + backend on Railway
-- ✅ Solana-native visual design with Geist typography
+- ✅ Earth + Mint design system with custom SVG logo and Geist typography
 
 ---
 
 ## What comes next
 
-**Q3 2026** — A pilot with 5 Turkish SMEs (we have early conversations going with textile workshops in Bursa and electronics suppliers in Konya) and 2 family-office investors. The synthetic training data gets replaced with real anonymized invoice data.
+**Q3 2026** — A pilot with 5 Turkish SMEs (we have early conversations going with textile workshops in Bursa and electronics suppliers in Konya) and 2 family-office investors. The synthetic training data gets replaced with real anonymized invoice data. The frontend migrates from direct SPL minting to full Anchor program integration with USDC escrow.
 
 **Q4 2026** — A KVKK (Turkish GDPR) compliance audit. Pyth oracle integration for live TRY/USD pricing. A buyer verification flow using e-signature attestations recorded on-chain.
 
@@ -250,9 +266,9 @@ For step-by-step deployment instructions, see [DEPLOY.md](DEPLOY.md).
 
 | Layer | Technology |
 |---|---|
-| On-chain | Solana, Anchor 0.30.1, SPL Token |
-| Risk model | XGBoost, scikit-learn, SHAP-via-XGBoost |
-| Backend | FastAPI, SQLAlchemy, Pydantic |
+| On-chain | Solana, Anchor 0.30.1, SPL Token (@solana/spl-token) |
+| Risk model | XGBoost, scikit-learn, SHAP via XGBoost's `pred_contribs` |
+| Backend | FastAPI, SQLAlchemy, Pydantic, SQLite |
 | Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS, Geist font |
 | Wallets | @solana/wallet-adapter (Phantom + Solflare) |
 | Deployment | Vercel (frontend), Railway (backend), Solana devnet (program) |
@@ -268,6 +284,8 @@ MIT — see [LICENSE](LICENSE). Use it, fork it, build on it.
 <div align="center">
 
 Built for **Colosseum Frontier 2026** · Superteam Türkiye Track
+
+**Paid before payday.**
 
 [Live demo](https://fatura-fi.vercel.app) · [Solana program](https://explorer.solana.com/address/CoM9J1UygQFBNwTbhK1AwT8vymCKL7dPM7KW76drNF36?cluster=devnet)
 
