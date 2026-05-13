@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { api, Sector, BuyerTier } from "@/lib/api";
-import { Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { Loader2, AlertCircle, Sparkles, ArrowRight } from "lucide-react";
 
 const SECTORS: { value: Sector; label: string }[] = [
   { value: "textile", label: "Textile" },
@@ -68,19 +68,25 @@ export default function ListInvoicePage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-semibold">List an invoice</h1>
-      <p className="text-ink-400 mt-1">
-        Tokenize your receivable. Get an instant AI-scored offer.
-      </p>
+      <div className="mb-10">
+        <div className="section-eyebrow">— List invoice</div>
+        <h1 className="text-display-md text-bark-800">
+          Get an <span className="font-serif-italic text-terra-500">AI-scored</span><br />
+          offer in seconds.
+        </h1>
+        <p className="text-bark-500 mt-3">
+          Tokenize your receivable. Find a stablecoin investor instantly.
+        </p>
+      </div>
 
       {!connected && (
-        <div className="mt-6 flex items-center gap-2 p-4 rounded-lg border border-amber-500/30 bg-amber-500/5 text-amber-300 text-sm">
+        <div className="mb-6 flex items-center gap-2 p-4 rounded-xl bg-terra-500/8 border border-terra-500/25 text-terra-700 text-sm">
           <AlertCircle size={16} />
           Connect your Phantom wallet to list an invoice.
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <Section title="Invoice details">
           <Field label="Your business name">
             <input
@@ -118,7 +124,7 @@ export default function ListInvoicePage() {
               >
                 {TIERS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
-              <div className="text-xs text-ink-500 mt-1">
+              <div className="text-xs text-bark-400 mt-1.5">
                 {TIERS.find((t) => t.value === form.buyer_tier)?.hint}
               </div>
             </Field>
@@ -177,7 +183,7 @@ export default function ListInvoicePage() {
               step={0.01}
               value={form.sme_ontime_ratio}
               onChange={(e) => setForm({ ...form, sme_ontime_ratio: Number(e.target.value) })}
-              className="w-full"
+              className="w-full accent-terra-500"
             />
           </Field>
         </Section>
@@ -207,7 +213,7 @@ export default function ListInvoicePage() {
         </Section>
 
         {error && (
-          <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/5 text-red-300 text-sm">
+          <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/5 text-red-700 text-sm">
             {error}
           </div>
         )}
@@ -215,12 +221,12 @@ export default function ListInvoicePage() {
         <button
           type="submit"
           disabled={submitting || !connected}
-          className="w-full py-3.5 rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-medium flex items-center justify-center gap-2"
+          className="btn-brand w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? (
             <><Loader2 size={16} className="animate-spin" /> Scoring invoice...</>
           ) : (
-            <><Sparkles size={16} /> Get AI-scored offer</>
+            <><Sparkles size={16} /> Get AI-scored offer <ArrowRight size={16} /></>
           )}
         </button>
       </form>
@@ -228,17 +234,21 @@ export default function ListInvoicePage() {
       <style jsx>{`
         :global(.input) {
           width: 100%;
-          background: #171717;
-          border: 1px solid #404040;
-          border-radius: 8px;
-          padding: 10px 12px;
-          color: #f5f5f5;
+          background: #FAF7F2;
+          border: 1px solid rgba(61, 46, 31, 0.1);
+          border-radius: 10px;
+          padding: 11px 14px;
+          color: #3D2E1F;
           font-size: 14px;
-          transition: border 0.15s;
+          transition: all 0.2s;
         }
         :global(.input:focus) {
           outline: none;
-          border-color: #2563eb;
+          border-color: rgba(198, 107, 61, 0.4);
+          background: #FFFFFF;
+        }
+        :global(.input::placeholder) {
+          color: rgba(61, 46, 31, 0.3);
         }
       `}</style>
     </div>
@@ -247,10 +257,10 @@ export default function ListInvoicePage() {
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-ink-800 bg-ink-900/40 p-6 space-y-4">
+    <div className="glass-card rounded-2xl p-6 space-y-4">
       <div>
-        <h2 className="font-semibold">{title}</h2>
-        {hint && <p className="text-xs text-ink-500 mt-1">{hint}</p>}
+        <h2 className="font-semibold text-lg text-bark-800">{title}</h2>
+        {hint && <p className="text-xs text-bark-400 mt-1">{hint}</p>}
       </div>
       {children}
     </div>
@@ -260,7 +270,7 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-sm text-ink-300 mb-1.5 block">{label}</span>
+      <span className="text-sm text-bark-700 mb-2 block font-medium">{label}</span>
       {children}
     </label>
   );

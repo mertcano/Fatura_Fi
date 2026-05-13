@@ -30,26 +30,35 @@ export default function PortfolioPage() {
   if (!connected) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-20 text-center">
-        <Wallet size={40} className="mx-auto text-ink-500 mb-4" />
-        <h1 className="text-2xl font-semibold">Connect your wallet</h1>
-        <p className="text-ink-400 mt-2">Sign in with Phantom to view your invoice portfolio.</p>
+        <div className="w-16 h-16 rounded-2xl bg-terra-500/10 border border-terra-500/25 flex items-center justify-center mx-auto mb-6">
+          <Wallet size={28} className="text-terra-500" />
+        </div>
+        <h1 className="text-display-md text-bark-800">
+          Connect your <span className="font-serif-italic text-terra-500">wallet</span>
+        </h1>
+        <p className="text-bark-500 mt-3">Sign in with Phantom to view your invoice portfolio.</p>
       </div>
     );
   }
 
   if (loading || !portfolio) {
-    return <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>;
+    return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-bark-400" /></div>;
   }
 
   const active = portfolio.invoices.filter((i) => i.status === "funded");
   const settled = portfolio.invoices.filter((i) => i.status === "settled");
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-semibold mb-2">Your portfolio</h1>
-      <p className="text-ink-400 mb-8 font-mono text-sm break-all">{portfolio.wallet}</p>
+    <div className="page-wrapper">
+      <div className="mb-10">
+        <div className="section-eyebrow">— Portfolio</div>
+        <h1 className="text-display-md text-bark-800">
+          Your <span className="font-serif-italic text-terra-500">positions</span>.
+        </h1>
+        <p className="text-bark-400 mt-2 font-mono text-xs break-all">{portfolio.wallet}</p>
+      </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
         <Stat icon={Clock} label="Active positions" value={portfolio.active_positions.toString()} />
         <Stat icon={Wallet} label="Invested" value={`$${portfolio.total_invested_usdc.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} />
         <Stat icon={TrendingUp} label="Expected returns" value={`$${portfolio.expected_returns_usdc.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} accent />
@@ -57,8 +66,8 @@ export default function PortfolioPage() {
       </div>
 
       {active.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-xl font-medium mb-4">Active positions</h2>
+        <section className="mb-12">
+          <h2 className="text-xl font-semibold mb-5 text-bark-800">Active positions</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {active.map((inv) => (
               <InvoiceCard key={inv.id} invoice={inv} canFund={false} onUpdate={load} />
@@ -69,7 +78,7 @@ export default function PortfolioPage() {
 
       {settled.length > 0 && (
         <section>
-          <h2 className="text-xl font-medium mb-4">Settled</h2>
+          <h2 className="text-xl font-semibold mb-5 text-bark-800">Settled</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {settled.map((inv) => (
               <InvoiceCard key={inv.id} invoice={inv} canFund={false} onUpdate={load} />
@@ -79,8 +88,9 @@ export default function PortfolioPage() {
       )}
 
       {portfolio.invoices.length === 0 && (
-        <div className="text-center py-16 text-ink-500">
-          You haven&apos;t funded any invoices yet. Visit the marketplace to get started.
+        <div className="text-center py-20 text-bark-500">
+          <p>You haven&apos;t funded any invoices yet.</p>
+          <p className="text-sm mt-2 text-bark-400">Visit the marketplace to get started.</p>
         </div>
       )}
     </div>
@@ -89,11 +99,11 @@ export default function PortfolioPage() {
 
 function Stat({ icon: Icon, label, value, accent }: any) {
   return (
-    <div className="rounded-xl border border-ink-800 bg-ink-900/40 p-4">
-      <div className="flex items-center gap-2 text-ink-500 text-xs mb-2">
+    <div className="glass-card rounded-2xl p-5">
+      <div className="flex items-center gap-2 text-bark-400 text-[10px] mb-3 font-mono uppercase tracking-wider font-semibold">
         <Icon size={12} /> {label}
       </div>
-      <div className={`text-2xl font-semibold ${accent ? "text-emerald-400" : ""}`}>{value}</div>
+      <div className={`text-3xl font-semibold font-mono ${accent ? "text-mint-500" : "text-bark-800"}`}>{value}</div>
     </div>
   );
 }

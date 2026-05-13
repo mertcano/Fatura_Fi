@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { api, Invoice } from "@/lib/api";
 import { InvoiceCard } from "@/components/InvoiceCard";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function InvoiceDetailPage() {
@@ -20,30 +20,37 @@ export default function InvoiceDetailPage() {
 
   if (loading) return (
     <div className="flex justify-center py-20">
-      <Loader2 className="animate-spin text-ink-500" />
+      <Loader2 className="animate-spin text-bark-400" />
     </div>
   );
 
   if (!inv) return (
-    <div className="text-center py-20 text-ink-500">Invoice not found</div>
+    <div className="text-center py-20 text-bark-500">Invoice not found</div>
   );
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
-      <Link href="/marketplace" className="text-sm text-ink-400 hover:text-ink-200">← Back to marketplace</Link>
-      <h1 className="text-3xl font-semibold mt-4 mb-2">Invoice scored & listed</h1>
-      <p className="text-ink-400 mb-8">Your invoice is now live on the marketplace. Investors can fund it instantly.</p>
+      <Link href="/marketplace" className="inline-flex items-center gap-2 text-sm text-bark-500 hover:text-bark-800 transition">
+        <ArrowLeft size={14} /> Back to marketplace
+      </Link>
+      <h1 className="text-display-md text-bark-800 mt-6">
+        Invoice <span className="font-serif-italic text-mint-500">scored</span><br />
+        and listed.
+      </h1>
+      <p className="text-bark-500 mt-3 mb-10">
+        Your invoice is now live on the marketplace. Investors can fund it instantly.
+      </p>
 
       <div className="max-w-md">
         <InvoiceCard invoice={inv} canFund={false} onUpdate={() => {}} />
       </div>
 
-      <div className="mt-8 p-5 rounded-lg border border-ink-800 bg-ink-900/30 text-sm space-y-2">
-        <h3 className="font-medium text-ink-200">Next steps</h3>
-        <ol className="list-decimal pl-5 text-ink-400 space-y-1">
-          <li>Share this listing with potential investors (link this page).</li>
-          <li>When funded, discounted USDC will land in your wallet within seconds.</li>
-          <li>Your buyer settles directly on maturity — face value goes to the investor.</li>
+      <div className="mt-8 glass-card rounded-2xl p-6 text-sm space-y-3">
+        <h3 className="font-semibold text-bark-800">Next steps</h3>
+        <ol className="space-y-2 text-bark-500">
+          <li className="flex gap-3"><span className="text-terra-500 font-mono font-semibold">01</span> Share this listing with potential investors.</li>
+          <li className="flex gap-3"><span className="text-terra-500 font-mono font-semibold">02</span> When funded, discounted USDC will land in your wallet within seconds.</li>
+          <li className="flex gap-3"><span className="text-terra-500 font-mono font-semibold">03</span> Your buyer settles directly on maturity — face value goes to the investor.</li>
         </ol>
       </div>
     </div>

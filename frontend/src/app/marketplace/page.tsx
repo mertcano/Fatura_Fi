@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { api, Invoice, InvoiceGrade, Sector } from "@/lib/api";
+import { api, Invoice, Sector } from "@/lib/api";
 import { InvoiceCard } from "@/components/InvoiceCard";
 import { Filter, Loader2 } from "lucide-react";
 
-const GRADES: InvoiceGrade[] = ["A", "B", "C", "D", "E"];
 const SECTORS: { value: Sector | "all"; label: string }[] = [
   { value: "all", label: "All sectors" },
   { value: "textile", label: "Textile" },
@@ -60,41 +59,42 @@ export default function MarketplacePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-      <div className="flex items-end justify-between mb-8">
+    <div className="page-wrapper">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
         <div>
-          <h1 className="text-3xl font-semibold">Marketplace</h1>
-          <p className="text-ink-400 mt-1">
-            Browse tokenized invoices. Earn 8–35% APY on real-world receivables.
+          <div className="section-eyebrow">— Marketplace</div>
+          <h1 className="text-display-md text-bark-800">
+            <span className="font-serif-italic text-terra-500">Tokenized</span> invoices,<br />
+            ready to fund.
+          </h1>
+          <p className="text-bark-500 mt-3 max-w-xl">
+            Browse risk-scored invoices. Earn 8–35% APY on real-world receivables.
           </p>
         </div>
         {!seeded && invoices.length === 0 && !loading && (
-          <button
-            onClick={seedDemo}
-            className="px-4 py-2 text-sm rounded-lg border border-ink-700 hover:border-brand-500"
-          >
+          <button onClick={seedDemo} className="btn-secondary">
             Load demo invoices
           </button>
         )}
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-8 p-4 rounded-lg border border-ink-800 bg-ink-900/30">
+      <div className="glass-card rounded-2xl p-5 mb-8 flex flex-wrap gap-5 items-center">
         <div className="flex items-center gap-2">
-          <Filter size={16} className="text-ink-500" />
-          <span className="text-sm text-ink-400">Filters:</span>
+          <Filter size={14} className="text-bark-400" />
+          <span className="text-sm text-bark-600 font-semibold">Filters</span>
         </div>
         <select
           value={sector}
           onChange={(e) => setSector(e.target.value as Sector | "all")}
-          className="bg-ink-900 border border-ink-700 rounded-md px-3 py-1.5 text-sm"
+          className="bg-cream-50 border border-bark-800/10 rounded-lg px-3 py-2 text-sm text-bark-800 outline-none focus:border-terra-500/40"
         >
           {SECTORS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-ink-400">Max risk:</span>
+        <div className="flex items-center gap-3 flex-1 min-w-[200px]">
+          <span className="text-sm text-bark-500">Max risk</span>
           <input
             type="range"
             min={20}
@@ -102,19 +102,19 @@ export default function MarketplacePage() {
             step={10}
             value={maxRisk}
             onChange={(e) => setMaxRisk(Number(e.target.value))}
-            className="w-32"
+            className="flex-1 accent-terra-500"
           />
-          <span className="text-sm font-mono text-ink-300 w-8">{maxRisk}</span>
+          <span className="text-sm font-mono text-bark-800 w-8 font-semibold">{maxRisk}</span>
         </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="animate-spin text-ink-500" />
+          <Loader2 className="animate-spin text-bark-400" />
         </div>
       ) : invoices.length === 0 ? (
-        <div className="text-center py-20 text-ink-500">
-          No invoices match your filters.
+        <div className="text-center py-20 text-bark-500">
+          <p>No invoices match your filters.</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

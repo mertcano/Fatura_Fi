@@ -19,18 +19,15 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-ink-950/70 border-b border-white/5">
+    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-cream-50/80 border-b border-bark-800/8">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative">
-            <div className="w-9 h-9 rounded-xl bg-gradient-brand flex items-center justify-center font-bold text-white shadow-glow-purple-sm">
-              F
-            </div>
-            <div className="absolute inset-0 rounded-xl bg-gradient-brand opacity-0 group-hover:opacity-50 blur-md transition-opacity" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-terra-500 to-terra-700 flex items-center justify-center font-bold text-cream-50 text-sm">
+            F
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="font-medium text-base tracking-tight">FaturaFi</span>
-            <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider rounded-md bg-mint-500/10 text-mint-400 border border-mint-500/20 font-mono">
+            <span className="font-semibold text-base tracking-tight text-bark-800">FaturaFi</span>
+            <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider rounded-md bg-mint-500/10 text-mint-500 border border-mint-500/25 font-mono font-semibold">
               devnet
             </span>
           </div>
@@ -45,8 +42,8 @@ export function Header() {
                 href={link.href}
                 className={`px-4 py-2 text-sm rounded-full transition-all ${
                   active
-                    ? "text-white bg-white/5"
-                    : "text-ink-300 hover:text-white hover:bg-white/[0.03]"
+                    ? "text-bark-800 bg-bark-800/6"
+                    : "text-bark-500 hover:text-bark-800 hover:bg-bark-800/4"
                 }`}
               >
                 {link.label}
