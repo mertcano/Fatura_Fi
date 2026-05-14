@@ -134,12 +134,7 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://fatura-fi.vercel.app",
-    "https://fatura-fi-mertcano.vercel.app",
-    "https://fatura-fi-mertcano-fatura-fis-projects.vercel.app",],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -228,6 +223,7 @@ def list_invoices(
     max_risk_score: int | None = None,
     min_amount_usdc: float | None = None,
     max_amount_usdc: float | None = None,
+    sme_wallet: str | None = None,
 ):
     """Marketplace listing with filters."""
     db = SessionLocal()
@@ -243,6 +239,8 @@ def list_invoices(
             q = q.filter(Invoice.amount_usdc >= min_amount_usdc)
         if max_amount_usdc is not None:
             q = q.filter(Invoice.amount_usdc <= max_amount_usdc)
+        if sme_wallet:
+            q = q.filter(Invoice.sme_wallet == sme_wallet)
         return [InvoiceResponse.model_validate(i) for i in q.order_by(Invoice.created_at.desc()).all()]
     finally:
         db.close()
@@ -323,14 +321,36 @@ def portfolio(wallet: str):
 
 
 @app.post("/api/seed")
-def seed_demo_data():
-    """Populate database with realistic demo invoices for the pitch."""
+def seed_demo_data(force: bool = False):
+    """Populate database with realistic demo invoices for the pitch.
+
+    If force=true is passed, ALL invoices are deleted first and the database
+    is fully reseeded. Use this when the marketplace has stale or test data.
+    """
     import random
     random.seed(7)
+
+    # Demo SME wallets are prefixed so we can detect / clean them up cleanly
+    DEMO_WALLET_PREFIX = "DEMOsme"
+
     db = SessionLocal()
     try:
-        if db.query(Invoice).count() > 0:
-            return {"status": "already_seeded"}
+        if force:
+            # Nuke everything and start fresh
+            db.query(Invoice).delete()
+            db.commit()
+        else:
+            # Only skip if all 8 demo invoices are already present
+            demo_count = db.query(Invoice).filter(
+                Invoice.sme_wallet.like(f"{DEMO_WALLET_PREFIX}%")
+            ).count()
+            if demo_count >= 8:
+                return {"status": "already_seeded", "demo_count": demo_count}
+            # Otherwise wipe just the demo invoices so we can recreate them
+            db.query(Invoice).filter(
+                Invoice.sme_wallet.like(f"{DEMO_WALLET_PREFIX}%")
+            ).delete(synchronize_session=False)
+            db.commit()
     finally:
         db.close()
 
@@ -370,4 +390,4 @@ def seed_demo_data():
             buyer_avg_days_late=round(random.uniform(0, 15), 1),
         )
         created.append(create_invoice(payload))
-    return {"status": "seeded", "count": len(created)}
+    return {"status": "seeded", "count": len(created), "force": force}
