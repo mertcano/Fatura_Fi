@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Brain, Coins, ShieldCheck, Zap } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Brain, Coins, ShieldCheck, Zap, ChevronDown } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -157,6 +158,62 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ═══════════════ FAQ ═══════════════ */}
+      <section className="relative py-24 px-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-14">
+            <div className="section-eyebrow">— FAQ</div>
+            <h2 className="text-display-md text-bark-800">
+              Frequently asked<br />
+              <span className="text-gradient-brand">questions.</span>
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            <FaqItem
+              question="What exactly is FaturaFi?"
+              answer="FaturaFi is a marketplace that turns unpaid invoices into Solana NFTs. Turkish small businesses tokenize their receivables to access instant liquidity, while investors fund those NFTs and earn yield when the buyer pays at maturity. Every invoice is risk-scored by an AI model with explainable SHAP outputs."
+            />
+            <FaqItem
+              question="How do small businesses actually benefit?"
+              answer="Turkish SMEs typically wait 60–120 days to get paid by their buyers. During that wait, they still have to pay suppliers, rent, and employees. FaturaFi lets them tokenize the unpaid invoice as an NFT, get most of its value as instant SOL from an investor, and let the investor collect the full amount when the buyer eventually settles."
+            />
+            <FaqItem
+              question="What's in it for investors?"
+              answer="Investors fund discounted invoice NFTs and collect the face value at maturity. The spread is the yield — typically 8–35% APY depending on the risk grade. Every invoice comes with a transparent AI risk score (A–E) and SHAP explanations, so you can see exactly what drove the score before committing capital."
+            />
+            <FaqItem
+              question="How does the AI risk scoring work?"
+              answer="We use an XGBoost model trained on 10,000 invoices calibrated to real Turkish factoring patterns. It looks at 22 features — buyer tier, sector, payment history, macroeconomic conditions, term length, and more. The model has a test AUC of 0.72. Every prediction includes SHAP values showing the top drivers, hashed and committed on-chain for auditability."
+            />
+            <FaqItem
+              question="Why Solana and not another chain?"
+              answer="Three reasons that aren't marketing fluff. (1) Transaction cost — at ~$0.00025 per tx, micro-invoices stay economically viable. On Ethereum L1 gas would eat the entire spread. (2) Settlement speed — 400ms finality means SMEs get cash in seconds, not the 3–5 days banks take. (3) Throughput — 65k TPS scales to millions of invoices without congestion pricing. The product is genuinely impossible on most other chains."
+            />
+            <FaqItem
+              question="Do I need to know crypto to use this?"
+              answer="You need a Phantom wallet and a small amount of SOL for network fees (~0.002 SOL per action). That's it. You don't need to understand smart contracts, bridges, or token swaps. The dApp handles everything else. For Turkish SMEs we're also planning a fiat on-ramp through the Q3 2026 pilot so business owners can interact entirely in TRY."
+            />
+            <FaqItem
+              question="Is this live with real money?"
+              answer="Right now FaturaFi runs on Solana devnet — every NFT mint, every fund action is a real on-chain transaction you can verify on Solana Explorer, but it uses test SOL with no monetary value. The Q3 2026 pilot will move to mainnet with 5 SMEs and 2 family-office investors, using anonymized real invoice data instead of synthetic training data."
+            />
+            <FaqItem
+              question="What happens if a buyer doesn't pay?"
+              answer="If a buyer misses the maturity date by more than 7 days, the invoice can be marked as defaulted on-chain — anyone can trigger this, not just the investor. The Anchor program then unlocks a recovery flow. The risk score (A–E) already prices in default probability, so investors should expect a small percentage of E-grade invoices to default; that's why their APY is higher."
+            />
+            <FaqItem
+              question="How is this different from traditional factoring?"
+              answer="Bank factoring requires collateral, credit history, and 3–5 days of paperwork. Effective rates run 20–35% per year. FaturaFi tokenizes the receivable directly, settles in seconds, and matches global capital to specific invoices. No bank intermediation, no FX costs, no opaque underwriting. The AI scoring is also fully transparent — investors see the same SHAP explanation the protocol uses."
+            />
+            <FaqItem
+              question="Who built this and is it production-ready?"
+              answer="FaturaFi is a hackathon MVP built for Colosseum Frontier 2026 (Superteam Türkiye track). Everything you see works end-to-end: real on-chain NFT mints, live AI scoring, deployed Anchor program. It's not yet production for real money — the next milestones are the Q3 2026 pilot, KVKK compliance audit (Turkish GDPR), and Pyth oracle integration for live TRY/USD pricing."
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ═══════════════ FINAL CTA ═══════════════ */}
       <section className="relative py-24 px-6">
         <div className="max-w-4xl mx-auto text-center relative">
@@ -177,6 +234,33 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`glass-card rounded-2xl overflow-hidden transition-all ${open ? "border-terra-500/30" : ""}`}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-6 py-5 flex items-center justify-between text-left gap-4 hover:bg-bark-800/2 transition-colors"
+      >
+        <span className="font-medium text-bark-800 text-base">{question}</span>
+        <ChevronDown
+          size={18}
+          className={`shrink-0 text-bark-500 transition-transform duration-300 ${open ? "rotate-180 text-terra-500" : ""}`}
+        />
+      </button>
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="px-6 pb-5 pt-1 text-bark-500 text-sm leading-relaxed">{answer}</p>
+        </div>
+      </div>
     </div>
   );
 }
