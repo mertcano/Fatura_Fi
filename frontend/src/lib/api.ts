@@ -117,6 +117,7 @@ export const api = {
     max_risk_score?: number;
     min_amount_usdc?: number;
     max_amount_usdc?: number;
+    sme_wallet?: string;
   }) => {
     const qs = new URLSearchParams();
     if (filters) {
